@@ -8,6 +8,11 @@
 
 set -euo pipefail
 
+die() {
+  printf '%s\n' "$1" >&2
+  exit 1
+}
+
 _open() {
   if [ `uname` == "Darwin" ]; then
     open "$1"
@@ -31,15 +36,20 @@ done
 explain='EXPLAIN (ANALYZE, COSTS, VERBOSE, BUFFERS, FORMAT JSON)'
 psql_args=( "$@" )
 query_file="${positional[0]}"
-query_file_tmp=$(mktemp "${TMPDIR:-/tmp/}explain.XXXXXXXXX")
-plan_file_tmp=$(mktemp "${TMPDIR:-/tmp/}plan.XXXXXXXXX")
-echo "$explain" >> $query_file_tmp
-cat $query_file >> $query_file_tmp
-psql --no-psqlrc -qAt -f "$query_file_tmp" "${psql_args[@]}" > $plan_file_tmp
+query_tmp_file=$(mktemp "${TMPDIR:-/tmp/}explain_query.XXXXXXXXX")
+plan_tmp_file=$(mktemp "${TMPDIR:-/tmp/}explain_plan.XXXXXXXXX")
+stderr_tmp_file=$(mktemp "${TMPDIR:-/tmp/}explain_stderr.XXXXXXXXX")
+echo "$explain" >> $query_tmp_file
+cat $query_file >> $query_tmp_file
+psql --no-psqlrc -qAt -f "$query_tmp_file" "${psql_args[@]}" > $plan_tmp_file 2> "$stderr_tmp_file"
+
+if [ -s "$stderr_tmp_file" ]; then
+  die "$(cat "$stderr_tmp_file")"
+fi;
 
 # Ended up using httpie here instead of curl because curl doesn't support
 # passing file as argument for this type of form POST
-_open $(http -ph --form POST https://explain.dalibo.com/new plan=@"$plan_file_tmp" sql=@"$query_file" \
+_open $(http -ph --form POST https://explain.dalibo.com/new plan=@"$plan_tmp_file" sql=@"$query_file" \
   | grep Location: \
   | sed 's/Location: //' \
   | tr -d '\r')
