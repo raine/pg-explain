@@ -3,8 +3,8 @@
 # Executes the given query sql file, and sends the query plan and run time
 # statistics to explain.dalibo.com. Opens result page in browser.
 #
-# Usage: explain <queryfile.sql> -- <psql args>
-# Example: explain query.sql -- 'postgres:://localhost:5432/mydb'
+# Usage: pg-explain <queryfile.sql> -- <psql args>
+# Example: pg-explain query.sql -- 'postgres:://localhost:5432/mydb'
 
 set -euo pipefail
 
