@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-# Executes the given query sql file, and sends the query plan and run time
-# statistics to explain.dalibo.com. Opens result page in browser.
+# Executes the given sql file and sends its query plan and run time statistics
+# to explain.dalibo.com. Then, opens the query plan visualization in browser.
 #
 # Usage: pg-explain <queryfile.sql> -- <psql args>
 #
 # Example:
 #
-#   $ pg-explain query.sql -- 'postgres:://localhost:5432/mydb'
+#   $ pg-explain query.sql -- 'postgres://localhost:5432/mydb'
 #   https://explain.dalibo.com/plan/8qE
 
 set -euo pipefail
