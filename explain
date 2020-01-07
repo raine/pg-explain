@@ -36,7 +36,6 @@ plan_file_tmp=$(mktemp "${TMPDIR:-/tmp/}plan.XXXXXXXXX")
 echo "$explain" >> $query_file_tmp
 cat $query_file >> $query_file_tmp
 psql --no-psqlrc -qAt -f "$query_file_tmp" "${psql_args[@]}" > $plan_file_tmp
-query_sql=$(cat "$query_file")
 
 # Ended up using httpie here instead of curl because curl doesn't support
 # passing file as argument for this type of form POST
