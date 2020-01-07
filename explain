@@ -1,50 +1,27 @@
 #!/usr/bin/env bash
 
-getopt --test 2> /dev/null
-if [[ $? -ne 4 ]]; then
-    echo "GNU's enhanced getopt is required to run this script"
-    echo "You can usually find this in the util-linux package"
-    echo "On MacOS/OS X: brew install gnu-getopt"
-    echo "For anyone else, build from source: http://frodo.looijaard.name/project/getopt"
-    exit 1
-fi
-
 set -euo pipefail
-IFS=$'\n\t'
 
-declare -a EXTRA_ARGS
-declare -a POSITIONAL
+declare -a positional
 
-SHORT=-h:
-LONG=help:
-
-PARSED=$(getopt --options ${SHORT} \
-                --longoptions ${LONG} \
-                --name "$0" \
-                -- "$@")
-
-eval set -- "${PARSED}"
-
-dashes=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --) dashes=1 ;;
+    --) shift; break ;;
     *)
-      if [[ $dashes -eq 0 ]]; then POSITIONAL+=("$1");
-      else EXTRA_ARGS+=("$1"); fi
+      positional+=("$1");
       ;;
   esac
   shift
 done
-set -- "${POSITIONAL[@]}"
 
 explain='EXPLAIN (ANALYZE, COSTS, VERBOSE, BUFFERS, FORMAT JSON)'
-query_file="$1"
+psql_args=( "$@" )
+query_file="${positional[0]}"
 query_file_tmp=$(mktemp "${TMPDIR:-/tmp/}explain.XXXXXXXXX")
 plan_file_tmp=$(mktemp "${TMPDIR:-/tmp/}plan.XXXXXXXXX")
 echo "$explain" >> $query_file_tmp
 cat $query_file >> $query_file_tmp
-psql --no-psqlrc -qAt -f "$query_file_tmp" "${EXTRA_ARGS[@]}" > $plan_file_tmp
+psql --no-psqlrc -qAt -f "$query_file_tmp" "${psql_args[@]}" > $plan_file_tmp
 query_sql=$(cat "$query_file")
 
 # Ended up using httpie here instead of curl because curl doesn't support
