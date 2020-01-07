@@ -21,6 +21,10 @@ _open() {
   fi
 }
 
+if ! which http > /dev/null; then
+  die "ERROR: Dependency HTTPie (https://httpie.org) not in path"
+fi;
+
 declare -a positional
 
 while [[ $# -gt 0 ]]; do
