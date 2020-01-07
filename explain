@@ -8,6 +8,14 @@
 
 set -euo pipefail
 
+_open() {
+  if [ `uname` == "Darwin" ]; then
+    open "$1"
+  else
+    xdg-open "$1"
+  fi
+}
+
 declare -a positional
 
 while [[ $# -gt 0 ]]; do
@@ -32,7 +40,7 @@ query_sql=$(cat "$query_file")
 
 # Ended up using httpie here instead of curl because curl doesn't support
 # passing file as argument for this type of form POST
-open $(http -ph --form POST https://explain.dalibo.com/new plan=@"$plan_file_tmp" sql=@"$query_file" \
+_open $(http -ph --form POST https://explain.dalibo.com/new plan=@"$plan_file_tmp" sql=@"$query_file" \
   | grep Location: \
   | sed 's/Location: //' \
   | tr -d '\r')
