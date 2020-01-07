@@ -4,7 +4,11 @@
 # statistics to explain.dalibo.com. Opens result page in browser.
 #
 # Usage: pg-explain <queryfile.sql> -- <psql args>
-# Example: pg-explain query.sql -- 'postgres:://localhost:5432/mydb'
+#
+# Example:
+#
+#   $ pg-explain query.sql -- 'postgres:://localhost:5432/mydb'
+#   https://explain.dalibo.com/plan/8qE
 
 set -euo pipefail
 
@@ -48,7 +52,10 @@ psql -v ON_ERROR_STOP=1 --no-psqlrc -qAt -f "$query_tmp_file" "${psql_args[@]}" 
 
 # Ended up using httpie here instead of curl because curl doesn't support
 # passing file as argument for this type of form POST
-_open $(http -ph --form POST https://explain.dalibo.com/new plan=@"$plan_tmp_file" sql=@"$query_file" \
+plan_url=$(http -ph --form POST https://explain.dalibo.com/new plan=@"$plan_tmp_file" sql=@"$query_file" \
   | grep Location: \
   | sed 's/Location: //' \
   | tr -d '\r')
+
+echo "$plan_url"
+_open "$plan_url"
