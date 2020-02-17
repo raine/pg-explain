@@ -18,14 +18,14 @@ die() {
 }
 
 _open() {
-  if [ `uname` == "Darwin" ]; then
+  if [ "$(uname)" == "Darwin" ]; then
     open "$1"
   else
     xdg-open "$1"
   fi
 }
 
-if ! which http > /dev/null; then
+if ! command -v http > /dev/null; then
   die "ERROR: Dependency HTTPie (https://httpie.org) not in path"
 fi;
 
@@ -46,9 +46,9 @@ psql_args=( "$@" )
 query_file="${positional[0]}"
 query_tmp_file=$(mktemp "${TMPDIR:-/tmp/}explain_query.XXXXXXXXX")
 plan_tmp_file=$(mktemp "${TMPDIR:-/tmp/}explain_plan.XXXXXXXXX")
-echo "$explain" >> $query_tmp_file
-cat $query_file >> $query_tmp_file
-psql -v ON_ERROR_STOP=1 --no-psqlrc -qAt -f "$query_tmp_file" "${psql_args[@]}" > $plan_tmp_file
+echo "$explain" >> "$query_tmp_file"
+cat "$query_file" >> "$query_tmp_file"
+psql -v ON_ERROR_STOP=1 --no-psqlrc -qAt -f "$query_tmp_file" "${psql_args[@]}" > "$plan_tmp_file"
 
 # Ended up using httpie here instead of curl because curl doesn't support
 # passing file as argument for this type of form POST
