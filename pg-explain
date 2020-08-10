@@ -27,22 +27,25 @@ _open() {
 
 if ! command -v http > /dev/null; then
   die "ERROR: Dependency HTTPie (https://httpie.org) not in path"
-fi;
+fi
 
 declare -a positional
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --) shift; break ;;
+    --)
+      shift
+      break
+      ;;
     *)
-      positional+=("$1");
+      positional+=("$1")
       ;;
   esac
   shift
 done
 
 explain='EXPLAIN (ANALYZE, COSTS, VERBOSE, BUFFERS, FORMAT JSON)'
-psql_args=( "$@" )
+psql_args=("$@")
 query_file="${positional[0]}"
 query_tmp_file=$(mktemp "${TMPDIR:-/tmp/}explain_query.XXXXXXXXX")
 plan_tmp_file=$(mktemp "${TMPDIR:-/tmp/}explain_plan.XXXXXXXXX")
