@@ -55,10 +55,10 @@ psql -v ON_ERROR_STOP=1 --no-psqlrc -qAt -f "$query_tmp_file" "${psql_args[@]}" 
 
 # Ended up using httpie here instead of curl because curl doesn't support
 # passing file as argument for this type of form POST
-plan_id=$(http --json POST https://explain.dalibo.com/new plan=@"$plan_tmp_file" sql=@"$query_file" \
-  | jq --raw-output .id)
-
-plan_url="https://explain.dalibo.com/plan/$plan_id"
+plan_url=$(http -ph --form POST https://explain.dalibo.com/new plan=@"$plan_tmp_file" sql=@"$query_file" \
+  | grep Location: \
+  | sed 's/Location: //' \
+  | tr -d '\r')
 
 echo "$plan_url"
 _open "$plan_url"
